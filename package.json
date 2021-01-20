@@ -1,0 +1,14 @@
+{
+    "name": "@ijstech/static",
+    "version": "0.0.1",
+    "description": "Static middleware plugin",
+    "author": "https://ijs.network",    
+    "license": "MIT",
+    "dependencies": {
+        "koa-send": "^5.0.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ijstech/static"
+    }
+}
