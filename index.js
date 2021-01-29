@@ -1,34 +1,89 @@
 const Path = require('path');
-const Send = require('koa-send');
 const RootPath = process.cwd();
+const Fs = require('fs')
+const Stat = require('util').promisify(Fs.stat);
 
-module.exports = function(options){
-    let staticUrlPath = [];
-    let staticLocalPath = [];
-    for (var url in options){
-        var item = options[url];
-        if (item.path){
-            staticUrlPath.push(Path.resolve(url) + '/');
-            staticLocalPath.push(Path.resolve(RootPath, item.path) + '/');
-        }
-    };    
-    return async function(ctx, next){        
-        for (var i = 0; i < staticUrlPath.length; i ++){            
-            if (ctx.path.indexOf(staticUrlPath[i]) === 0){                    
-                var path = Path.resolve(staticLocalPath[i], ctx.path.slice(staticUrlPath[i].length));                    
-                if (path.indexOf(staticLocalPath[i]) === 0){                    
-                    try{
-                        await Send(ctx, path, {root: '/'})
-                    }
-                    catch(err){
-                        ctx.status = 404;    
-                    }                    
-                }                        
-                else
-                    ctx.status = 404;
+var StaticUrlPath = [];
+var StaticLocalPath = [];
+var StaticLocalFile = {};
+
+function getFullPath(root, ...paths){    
+    let rootPath = root;
+    if (rootPath.slice(-1) != '/')
+        rootPath += '/'
+    let result = root;    
+    if (Array.isArray(paths)){
+        for (var i = 0; i < paths.length; i ++){
+            result = Path.join(result, paths[i])
+            if (result.indexOf(rootPath) != 0)
                 return;
-            }
+        }        
+        return result
+    }    
+    else
+        return;
+}
+function readFile(ctx, path){
+   return new Promise(async function(resolve, reject){
+        try{            
+            let stat = await Stat(path);
+            if (stat.isDirectory())
+                return reject()
+            ctx.set('Content-Length', stat.size);
+            ctx.set('Last-Modified', stat.mtime.toUTCString())
+            ctx.type = Path.extname(Path.basename(path));
+            ctx.body = Fs.createReadStream(path)
+            resolve();
         }
-        await next();
+        catch(err){
+            reject(err)
+        }
+   }) 
+}
+module.exports = {
+    _init: function(options){
+        StaticUrlPath = [];  
+        StaticLocalPath = [];
+        StaticLocalFile = {};
+        if (options.route){
+            for (var url in options.route){
+                var item = options.route[url];
+                if (item.file){
+                    StaticLocalFile[url] = item.file
+                }
+                else if (item.path){
+                    StaticUrlPath.push(Path.resolve(url) + '/');
+                    StaticLocalPath.push(Path.resolve(RootPath, item.path) + '/');
+                }
+            }; 
+        }
+    },
+    _middleware: async function(ctx, next){        
+        if (ctx.method == 'GET'){
+            if (StaticLocalFile[ctx.path]){
+                try{
+                    await readFile(ctx, StaticLocalFile[ctx.path])                        
+                    return;
+                }
+                catch(err){} 
+            }
+            else{
+                for (var i = 0; i < StaticUrlPath.length; i ++){                            
+                    if (ctx.path.indexOf(StaticUrlPath[i]) === 0){                    
+                        var path = getFullPath(StaticLocalPath[i], ctx.path.slice(StaticUrlPath[i].length));
+                        try{
+                            await readFile(ctx, path)                        
+                            return;
+                        }
+                        catch(err){
+                            break;
+                        }
+                    }
+                }
+            }            
+            await next();
+        }
+        else            
+            await next();
     }
 }
