@@ -1,2 +1,2 @@
 # @ijstech/static
-Static middleware plugin for [Secure Application Server](https://github.com/ijstech/app-server)
+Static middleware plugin for [IJS Secure Node Server](https://github.com/ijstech/node)
