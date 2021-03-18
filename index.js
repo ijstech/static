@@ -58,8 +58,8 @@ module.exports = {
             }; 
         }
     },
-    _middleware: async function(ctx, next){        
-        if (ctx.method == 'GET'){
+    _middleware: async function(ctx, next){
+        if (ctx.method == 'GET'){            
             if (StaticLocalFile[ctx.path]){
                 try{
                     await readFile(ctx, StaticLocalFile[ctx.path])                        
@@ -68,9 +68,9 @@ module.exports = {
                 catch(err){} 
             }
             else{
-                for (var i = 0; i < StaticUrlPath.length; i ++){                            
-                    if (ctx.path.indexOf(StaticUrlPath[i]) === 0){                    
-                        var path = getFullPath(StaticLocalPath[i], ctx.path.slice(StaticUrlPath[i].length));
+                for (let i = 0; i < StaticUrlPath.length; i ++){                            
+                    if (ctx.path.indexOf(StaticUrlPath[i]) === 0){
+                        let path = getFullPath(StaticLocalPath[i], ctx.path.slice(StaticUrlPath[i].length));
                         try{
                             await readFile(ctx, path)                        
                             return;

@@ -1,6 +1,6 @@
 {
     "name": "@ijstech/static",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "Static middleware plugin",
     "author": "https://ijs.network",    
     "license": "MIT",
