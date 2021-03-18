@@ -51,7 +51,7 @@ module.exports = {
                 if (item.file){
                     StaticLocalFile[url] = item.file
                 }
-                else if (item.path){
+                if (item.path){
                     StaticUrlPath.push(Path.resolve(url) + '/');
                     StaticLocalPath.push(Path.resolve(RootPath, item.path) + '/');
                 }
@@ -59,13 +59,18 @@ module.exports = {
         }
     },
     _middleware: async function(ctx, next){
-        if (ctx.method == 'GET'){            
+        if (ctx.method == 'GET'){
             if (StaticLocalFile[ctx.path]){
                 try{
-                    await readFile(ctx, StaticLocalFile[ctx.path])                        
+                    await readFile(ctx, getFullPath(RootPath, StaticLocalFile[ctx.path]))                        
                     return;
                 }
-                catch(err){} 
+                catch(err){
+                    console.dir(err);
+                } 
+            }
+            if (StaticLocalFile[ctx.path + '/']){
+                return ctx.redirect(ctx.path + '/');
             }
             else{
                 for (let i = 0; i < StaticUrlPath.length; i ++){                            
