@@ -1,7 +1,7 @@
 {
     "name": "@ijstech/static",
-    "version": "0.1.1",
-    "description": "Static middleware plugin",
+    "version": "0.1.2",
+    "description": "Static middleware plugin for IJS Secure Node",
     "author": "https://ijs.network",    
     "license": "MIT",
     "dependencies": {},

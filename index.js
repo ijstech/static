@@ -8,10 +8,10 @@ var StaticLocalPath = [];
 var StaticLocalFile = {};
 
 function getFullPath(root, ...paths){    
-    let rootPath = root;
+    let rootPath = root || RootPath;
     if (rootPath.slice(-1) != '/')
         rootPath += '/'
-    let result = root;    
+    let result = root || RootPath;    
     if (Array.isArray(paths)){
         for (var i = 0; i < paths.length; i ++){
             result = Path.join(result, paths[i])
@@ -90,5 +90,7 @@ module.exports = {
         }
         else            
             await next();
-    }
+    },
+    readFile: readFile,
+    getFullPath: getFullPath
 }
